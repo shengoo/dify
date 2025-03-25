@@ -14,7 +14,7 @@ env:
     langgenius/dify-sandbox:0.2.11
     langgenius/dify-plugin-daemon:0.0.6-local
     ubuntu/squid:latest
-    certbot/certbot
+    certbot/certbot:latest
     nginx:latest
     semitechnologies/weaviate:1.19.0
     langgenius/qdrant:v1.7.3
@@ -52,11 +52,23 @@ jobs:
         run: |
           echo "${{ env.DOCKER_IMAGES }}" | while read -r image; do
             # 提取镜像名称和标签
-            image_name=$(echo $image | cut -d'/' -f2- | cut -d':' -f1)
-            tag=$(echo $image | cut -d':' -f2)
+            if [[ $image == *":"* ]]; then
+              image_name=$(echo $image | cut -d':' -f1)
+              tag=$(echo $image | cut -d':' -f2)
+            else
+              image_name=$image
+              tag="latest"
+            fi
+            
+            # 处理镜像名称中的斜杠
+            if [[ $image_name == *"/"* ]]; then
+              repo_name=$(echo $image_name | cut -d'/' -f2-)
+            else
+              repo_name=$image_name
+            fi
             
             # 构建阿里云镜像地址
-            aliyun_image="${{ env.ALIYUN_REGISTRY }}/${{ env.ALIYUN_NAMESPACE }}/$image_name:$tag"
+            aliyun_image="${{ env.ALIYUN_REGISTRY }}/${{ env.ALIYUN_NAMESPACE }}/$repo_name:$tag"
             
             echo "Syncing $image to $aliyun_image"
             
