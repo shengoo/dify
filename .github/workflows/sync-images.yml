@@ -64,6 +64,8 @@ jobs:
             if [[ $image_name == *"/"* ]]; then
               # 移除域名部分（如果存在）
               repo_name=$(echo $image_name | sed -E 's/^([^/]+\.[^/]+\/|[^/]+\/)//')
+              # 如果还有多级路径，只保留最后一级
+              repo_name=$(echo $repo_name | sed -E 's/^.*\///')
             else
               repo_name=$image_name
             fi
