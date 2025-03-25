@@ -71,7 +71,15 @@ jobs:
             # 构建阿里云镜像地址
             aliyun_image="${{ env.ALIYUN_REGISTRY }}/${{ env.ALIYUN_NAMESPACE }}/$repo_name:$tag"
             
-            echo "Syncing $image to $aliyun_image"
+            echo "Checking if $aliyun_image exists..."
+            
+            # 检查镜像是否存在
+            if docker manifest inspect $aliyun_image >/dev/null 2>&1; then
+              echo "Image $aliyun_image already exists, skipping..."
+              continue
+            fi
+            
+            echo "Image $aliyun_image not found, syncing..."
             
             # 拉取原始镜像
             docker pull $image
