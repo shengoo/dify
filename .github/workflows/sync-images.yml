@@ -48,6 +48,11 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Clean up Docker system
+        run: |
+          docker system prune -af --volumes
+          df -h
+
       - name: Sync images
         run: |
           echo "${{ env.DOCKER_IMAGES }}" | while read -r image; do
@@ -93,4 +98,7 @@ jobs:
             docker push $aliyun_image
             
             echo "Successfully synced $image to $aliyun_image"
+            
+            # 同步完成后清理当前镜像
+            docker rmi $image $aliyun_image
           done
