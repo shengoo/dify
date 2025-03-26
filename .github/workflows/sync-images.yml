@@ -55,6 +55,13 @@ jobs:
       - name: Sync images
         run: |
           echo "${{ env.DOCKER_IMAGES }}" | while read -r image; do
+            # 跳过空行
+            if [ -z "$image" ]; then
+              continue
+            fi
+            
+            echo "Processing image: $image"
+            
             # 提取镜像名称和标签
             if [[ $image == *":"* ]]; then
               image_name=$(echo $image | cut -d':' -f1)
@@ -93,16 +100,20 @@ jobs:
             echo "Image $aliyun_image not found, syncing..."
             
             # 拉取原始镜像
+            echo "Pulling image: $image"
             docker pull $image
             
             # 打标签
+            echo "Tagging image: $image -> $aliyun_image"
             docker tag $image $aliyun_image
             
             # 推送到阿里云
+            echo "Pushing image to Aliyun: $aliyun_image"
             docker push $aliyun_image
             
             echo "Successfully synced $image to $aliyun_image"
             
             # 同步完成后清理当前镜像
+            echo "Cleaning up local images"
             docker rmi $image $aliyun_image
           done
