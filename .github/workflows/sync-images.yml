@@ -70,6 +70,11 @@ jobs:
               repo_name=$(echo $image_name | sed -E 's/^([^/]+\.[^/]+\/|[^/]+\/)//')
               # 如果还有多级路径，只保留最后一级
               repo_name=$(echo $repo_name | sed -E 's/^.*\///')
+              # 确保repo_name不为空
+              if [ -z "$repo_name" ]; then
+                echo "Error: Invalid image name format: $image"
+                continue
+              fi
             else
               repo_name=$image_name
             fi
